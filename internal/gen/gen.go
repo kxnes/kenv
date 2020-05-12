@@ -130,6 +130,10 @@ func (g *generator) generateTmplData(fields map[string]*types.Field) map[string]
 		case types.Secret:
 			data[f.Name].Field.Action = "Secret"
 		}
+
+		if _, ok := data[f.Type]; ok {
+			data[f.Name].Field.Func = "Get" + data[f.Name].Title
+		}
 	}
 
 	return data
