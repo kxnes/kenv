@@ -120,20 +120,29 @@ func (g *generator) generateTmplData(fields map[string]*types.Field) map[string]
 			data[f.Type] = &TmplData{Recv: recv, Title: title, Name: predefined, Field: f}
 		}
 
-		data[f.Name] = &TmplData{Recv: recv, Title: title, Name: f.Action, Field: f}
-
+		action := f.Action
 		switch f.Action {
 		case types.Want:
-			data[f.Name].Field.Action = "Want"
+			action = "Want"
 		case types.Must:
-			data[f.Name].Field.Action = "Must"
+			action = "Must"
 		case types.Secret:
-			data[f.Name].Field.Action = "Secret"
+			action = "Secret"
 		}
 
+		// for predefined functions only
+		fn := f.Func
 		if _, ok := data[f.Type]; ok {
-			data[f.Name].Field.Func = "Get" + data[f.Name].Title
+			fn = "Get" + title
 		}
+
+		data[f.Name] = &TmplData{Recv: recv, Title: title, Name: f.Action, Field: &types.Field{
+			Name:   f.Name,
+			Type:   f.Type,
+			Func:   fn,
+			EnvVar: f.EnvVar,
+			Action: action,
+		}}
 	}
 
 	return data
