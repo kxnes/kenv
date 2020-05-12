@@ -9,13 +9,16 @@ import (
 	"github.com/kxnes/kenv/internal/parser"
 )
 
+const errCode = 1
+
 func missing(f, v string) {
 	if v != "" {
 		return
 	}
+
 	flag.Usage()
 	fmt.Println("missing " + f)
-	os.Exit(2)
+	os.Exit(errCode)
 }
 
 func main() {
@@ -34,6 +37,6 @@ func main() {
 	err := gen.CodeGen(parser.New(target, filename))
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		os.Exit(errCode)
 	}
 }

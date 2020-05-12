@@ -2,12 +2,14 @@
 package gen
 
 const (
+	// Get represents template for predefined convert functions.
 	Get = `
 // Get{{ .Title }} decorates predefined by kenv convert function to follow one code style.
 func ({{ .Recv.Name }} *{{ .Recv.Type }}) Get{{ .Title }}(s string) ({{ .Field.Type }}, error) {
 	return {{ .Field.Func }}(s)
 }
 `
+	// New represents template for constructor.
 	New = `
 // New returns new {{ .Recv.Type }}. 
 func New{{ .Recv.Type }}() *{{ .Recv.Type }} {
@@ -18,6 +20,7 @@ func New{{ .Recv.Type }}() *{{ .Recv.Type }} {
 	return {{ .Recv.Name }}
 }
 `
+	// Want represents template for types.Want like.
 	Want = `
 // Want{{ .Title }} returns the {{ .Field.Type }} environment variable
 // or default value of {{ .Field.Type }} otherwise. No checks here.
@@ -27,6 +30,7 @@ func ({{ .Recv.Name }} *{{ .Recv.Type }}) Want{{ .Title }}(key string) {{ .Field
 	return val
 }
 `
+	// Must represents template for types.Must like.
 	Must = `
 // Must{{ .Title }} returns the {{ .Field.Type }} environment variable
 // if it is exist and valid or panics otherwise.
@@ -44,6 +48,7 @@ func ({{ .Recv.Name }} *{{ .Recv.Type }}) Must{{ .Title }}(key string) {{ .Field
 	return val
 }
 `
+	// Secret represents template for types.Secret like.
 	Secret = `
 // Secret{{ .Title }} returns the {{ .Field.Type }} environment variable
 // if it is exist and valid or panics otherwise.

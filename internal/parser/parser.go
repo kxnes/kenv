@@ -18,10 +18,11 @@ import (
 type ErrParse []error
 
 func (errs ErrParse) Error() string {
-	var s []string
-	for num, err := range errs {
-		s = append(s, fmt.Sprintf("%02d. %s", num+1, err))
+	s := make([]string, len(errs))
+	for i, err := range errs {
+		s[i] = fmt.Sprintf("%02d. %s", i, err)
 	}
+
 	return fmt.Sprintf("parse errors:\n%s\n", strings.Join(s, "\n"))
 }
 
@@ -32,10 +33,11 @@ type ErrSyntax struct {
 }
 
 func (e *ErrSyntax) Error() string {
-	var s []string
-	for _, err := range e.errs {
-		s = append(s, fmt.Sprintf("%q", err))
+	s := make([]string, len(e.errs))
+	for i, err := range e.errs {
+		s[i] = fmt.Sprintf("%q", err)
 	}
+
 	return fmt.Sprintf("[syntax] line %d errors: %s", e.line, strings.Join(s, ", "))
 }
 
@@ -44,6 +46,7 @@ func (e *ErrSyntax) append(val interface{}, err error) interface{} {
 	if err != nil {
 		e.errs = append(e.errs, err)
 	}
+
 	return val
 }
 
@@ -51,7 +54,7 @@ func (e *ErrSyntax) append(val interface{}, err error) interface{} {
 type ErrConsistence string
 
 func (e ErrConsistence) Error() string {
-	return fmt.Sprintf("[consistance] %s", string(e))
+	return fmt.Sprintf("[consistence] %s", string(e))
 }
 
 // Parser uses for parsing incoming file.
@@ -91,6 +94,7 @@ func (p *Parser) Parse() (err error) {
 	}
 
 	fs := token.NewFileSet()
+
 	p.asTree, err = parser.ParseFile(fs, p.filename, nil, 0)
 	if err != nil {
 		return fmt.Errorf("parse file error: %w", err)
@@ -135,6 +139,7 @@ func (p *Parser) checkConsistency() {
 	}
 }
 
+// Visit implements the ast.Visitor interface.
 func (p *Parser) Visit(node ast.Node) ast.Visitor {
 	// see the `ast.Visitor`'s `Visit` method docs
 	if node == nil {
@@ -166,6 +171,7 @@ func (p *Parser) findEnvVars(decl *ast.GenDecl) {
 
 		// because names unique we can omit checks like "Did we find already?"
 		p.parse("", st)
+
 		return
 	}
 }
@@ -198,10 +204,10 @@ func (p *Parser) parse(prefix string, s *ast.StructType) {
 
 			// because names unique (because of prefix) we can omit checks like "Did we find already?"
 			p.fields[name] = &types.Field{
-				Name:    name,
-				Type:    typeID,
-				EnvVar:  tag.EnvVar,
-				Action:  tag.Action,
+				Name:   name,
+				Type:   typeID,
+				EnvVar: tag.EnvVar,
+				Action: tag.Action,
 			}
 		}
 	}
@@ -229,7 +235,7 @@ func (p *Parser) parseTag(f *ast.Field) (*types.Tag, error) {
 	}
 
 	rawBody := strings.Split(targetTag, `"`)
-	if len(rawBody) != 3 {
+	if len(rawBody) != 3 { // env:, rawBody, _
 		return nil, errors.New("invalid tag")
 	}
 
@@ -245,9 +251,11 @@ func (p *Parser) parseTag(f *ast.Field) (*types.Tag, error) {
 	}
 }
 
+const maxNames = 1
+
 // parseName parses the name of field `f`.
 func (p *Parser) parseName(f *ast.Field) (string, error) {
-	if len(f.Names) > 1 {
+	if len(f.Names) > maxNames {
 		return "", errors.New("multiple names")
 	}
 
@@ -362,21 +370,12 @@ func (p *Parser) findTypeConv(decl *ast.FuncDecl) {
 	p.typeConv[targetType] = decl.Name.Name
 }
 
-// Overview prints parsing results as a table.
-func (p *Parser) Overview() {
-	format := "%20s | %20s | %20s | %6s | %20s\n"
-	fmt.Printf(format, "Name", "Type", "Env Variable", "Action", "Converter")
-	fmt.Println(strings.Repeat("-", 20+3+20+3+20+3+6+3+20))
-	for n, v := range p.fields {
-		fmt.Printf(format, n, v.Type, v.EnvVar, v.Action, v.Func)
-	}
-}
-
 // ParsedFields returns parsed fields only if parser parsed.
 func (p *Parser) ParsedFields() map[string]*types.Field {
 	if len(p.errors) != 0 || len(p.fields) == 0 {
 		return nil
 	}
+
 	return p.fields
 }
 

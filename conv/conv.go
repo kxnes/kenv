@@ -26,6 +26,7 @@ func Uint(s string) (uint, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return uint(val), nil
 }
 
@@ -35,6 +36,7 @@ func Uint8(s string) (uint8, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return uint8(val), nil
 }
 
@@ -44,6 +46,7 @@ func Uint16(s string) (uint16, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return uint16(val), nil
 }
 
@@ -53,6 +56,7 @@ func Uint32(s string) (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return uint32(val), nil
 }
 
@@ -62,6 +66,7 @@ func Uint64(s string) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return val, nil
 }
 
@@ -71,6 +76,7 @@ func Int(s string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return int(val), nil
 }
 
@@ -80,6 +86,7 @@ func Int8(s string) (int8, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return int8(val), nil
 }
 
@@ -89,6 +96,7 @@ func Int16(s string) (int16, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return int16(val), nil
 }
 
@@ -98,6 +106,7 @@ func Int32(s string) (int32, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return int32(val), nil
 }
 
@@ -107,6 +116,7 @@ func Int64(s string) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return val, nil
 }
 
@@ -115,12 +125,15 @@ func String(s string) (string, error) {
 	return s, nil
 }
 
+const maxRune = 1
+
 // Rune converts string `s` to rune.
 func Rune(s string) (rune, error) {
 	runes := []rune(s)
-	if len(runes) != 1 {
+	if len(runes) != maxRune {
 		return 0, errors.New("must be not empty")
 	}
+
 	return runes[0], nil
 }
 
@@ -130,6 +143,7 @@ func Float32(s string) (float32, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return float32(val), nil
 }
 
@@ -139,5 +153,6 @@ func Float64(s string) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return val, nil
 }

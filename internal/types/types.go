@@ -2,10 +2,12 @@
 package types
 
 const (
-	Want   = "-" // It will be nice if environment variable exist.
-	Must   = "!" // Environment variable must be exist and fine.
-	Secret = "*" // Environment variable must be exist and fine
-	//               and will be deleted from environment after init.
+	// Want like "It will be nice if environment variable exist."
+	Want = "-"
+	// Must like "Environment variable must be exist and fine."
+	Must = "!"
+	// Secret like "Environment variable must be exist and fine and will be deleted from environment after init."
+	Secret = "*"
 )
 
 type (

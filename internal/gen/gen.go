@@ -46,7 +46,9 @@ func CodeGen(p *parser.Parser) error {
 			return err
 		}
 	}
+
 	gen := generator{p: p}
+
 	return gen.generateFile()
 }
 
@@ -56,6 +58,7 @@ func (g *generator) generateFile() error {
 
 	dir, file := path.Split(g.p.Filename())
 	out := file[:strings.LastIndex(file, ".")] + "gen.go"
+
 	f, err := os.Create(path.Join(dir, out))
 	if err != nil {
 		return err
@@ -84,10 +87,12 @@ func (g *generator) generateFile() error {
 
 	for key, d := range data {
 		must(templates[d.Name].Execute(f, d))
+
 		if d.Name == predefined {
 			delete(data, key)
 		}
 	}
+
 	must(templates[construct].Execute(f, struct {
 		Recv *Recv
 		Data map[string]*TmplData
@@ -111,15 +116,17 @@ func (g *generator) generateTmplData(fields map[string]*types.Field) map[string]
 
 	for _, f := range fields {
 		title := strings.Title(strings.ReplaceAll(f.Type, ".", ""))
+
 		if strings.HasPrefix(f.Func, "kenv.") {
 			g.needImport = true
+
 			if _, ok := data[f.Type]; !ok {
 				data[f.Type] = &TmplData{Recv: recv, Title: title, Name: predefined, Field: f}
 			}
 		}
 
 		action := f.Action
-		switch f.Action {
+		switch action {
 		case types.Want:
 			action = "Want"
 		case types.Must:
