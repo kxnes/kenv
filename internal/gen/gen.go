@@ -113,11 +113,9 @@ func (g *generator) generateTmplData(fields map[string]*types.Field) map[string]
 		title := strings.Title(strings.ReplaceAll(f.Type, ".", ""))
 		if strings.HasPrefix(f.Func, "kenv.") {
 			g.needImport = true
-			if _, ok := data[f.Type]; ok {
-				continue
+			if _, ok := data[f.Type]; !ok {
+				data[f.Type] = &TmplData{Recv: recv, Title: title, Name: predefined, Field: f}
 			}
-
-			data[f.Type] = &TmplData{Recv: recv, Title: title, Name: predefined, Field: f}
 		}
 
 		action := f.Action
