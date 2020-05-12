@@ -1,9 +1,10 @@
+// Package conv contains internal checks of public conv package.
 package conv
 
 import (
 	"fmt"
 
-	kenv "kenv/kenv/pkg/conv"
+	kenv "github.com/kxnes/kenv/conv"
 )
 
 // GetPredefinedImport uses if need import of predefined convert functions.
@@ -11,7 +12,7 @@ import (
 func GetPredefinedImport() []string {
 	return []string{
 		`"os"`,
-		`kenv "kenv/kenv/pkg/conv"`,
+		`kenv "github.com/kxnes/kenv/conv"`,
 	}
 }
 

@@ -1,3 +1,4 @@
+// Package parser contains instruments for parsing AST and target.
 package parser
 
 import (
@@ -8,8 +9,8 @@ import (
 	"go/token"
 	"strings"
 
-	"kenv/kenv/internal/conv"
-	"kenv/kenv/internal/types"
+	"github.com/kxnes/kenv/internal/conv"
+	"github.com/kxnes/kenv/internal/types"
 )
 
 // ErrParse decorates the list of parsing errors.
@@ -120,12 +121,12 @@ func (p *Parser) checkConsistency() {
 
 	for name, t := range p.fields {
 		if fn, ok := p.typeConv[t.Type]; ok {
-			t.ConvFunc = fn
+			t.Func = fn
 			continue
 		}
 
 		if pre, ok := predefined[t.Type]; ok {
-			t.ConvFunc = pre
+			t.Func = pre
 			continue
 		}
 
@@ -367,7 +368,7 @@ func (p *Parser) Overview() {
 	fmt.Printf(format, "Name", "Type", "Env Variable", "Action", "Converter")
 	fmt.Println(strings.Repeat("-", 20+3+20+3+20+3+6+3+20))
 	for n, v := range p.fields {
-		fmt.Printf(format, n, v.Type, v.EnvVar, v.Action, v.ConvFunc)
+		fmt.Printf(format, n, v.Type, v.EnvVar, v.Action, v.Func)
 	}
 }
 

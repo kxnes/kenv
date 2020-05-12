@@ -1,21 +1,39 @@
 package main
 
 import (
-	"kenv/kenv/internal/gen"
-	"kenv/kenv/internal/parser"
+	"flag"
+	"fmt"
+	"os"
+
+	"github.com/kxnes/kenv/internal/gen"
+	"github.com/kxnes/kenv/internal/parser"
 )
+
+func missing(f, v string) {
+	if v != "" {
+		return
+	}
+	flag.Usage()
+	fmt.Println("missing " + f)
+	os.Exit(2)
+}
 
 func main() {
 	var (
-		target   = "Environment"
-		filename = "/home/kxnes/tmp/kenv/env/env.go"
+		target   string
+		filename string
 	)
 
-	p := parser.New(target, filename)
-	err := gen.CodeGen(p)
-	if err != nil {
-		panic(err)
-	}
+	flag.StringVar(&target, "t", "", "target struct describes environment")
+	flag.StringVar(&filename, "f", "", "target struct filename")
+	flag.Parse()
 
-	//p.Overview()
+	missing("target", target)
+	missing("filename", filename)
+
+	err := gen.CodeGen(parser.New(target, filename))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }

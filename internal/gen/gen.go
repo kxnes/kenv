@@ -1,3 +1,4 @@
+// Package gen contains instruments for generation.
 package gen
 
 import (
@@ -7,80 +8,18 @@ import (
 	"strings"
 	"text/template"
 
-	"kenv/kenv/internal/conv"
-	"kenv/kenv/internal/parser"
-	"kenv/kenv/internal/types"
+	"github.com/kxnes/kenv/internal/conv"
+	"github.com/kxnes/kenv/internal/parser"
+	"github.com/kxnes/kenv/internal/types"
 )
 
-const (
-	Get = `
-// Get{{ .Title }} decorates predefined by kenv convert function to follow one code style.
-func ({{ .Recv.Name }} *{{ .Recv.Type }}) Get{{ .Title }}(s string) ({{ .Field.Type }}, error) {
-	return {{ .Field.ConvFunc }}(s)
-}
-`
-	New = `
-// New returns new {{ .Recv.Type }}. 
-func New() *{{ .Recv.Type }} {
-	{{ .Recv.Name }} := new({{ .Recv.Type }})
-	{{- range $key, $value := .Data}}
-	{{ $value.Recv.Name}}.{{ $value.Field.Name }} = {{ $value.Recv.Name }}.{{ $value.Field.Action }}{{ $value.Title }}("{{ $value.Field.EnvVar }}")
-	{{- end}}
-	return {{ .Recv.Name }}
-}
-`
-	Want = `
-// Want{{ .Title }} returns the {{ .Field.Type }} environment variable
-// or default value of {{ .Field.Type }} otherwise. No checks here.
-func ({{ .Recv.Name }} *{{ .Recv.Type }}) Want{{ .Title }}(key string) {{ .Field.Type }} {
-	env, _ := os.LookupEnv(key)
-	val, _ := {{ .Recv.Name }}.{{ .Field.ConvFunc }}(env)
-	return val
-}
-`
-	Must = `
-// Must{{ .Title }} returns the {{ .Field.Type }} environment variable
-// if it is exist and valid or panics otherwise.
-func ({{ .Recv.Name }} *{{ .Recv.Type }}) Must{{ .Title }}(key string) {{ .Field.Type }} {
-	env, ok := os.LookupEnv(key)
-	if !ok {
-		panic("error missing " + key)
-	}
-
-	val, err := {{ .Recv.Name }}.{{ .Field.ConvFunc }}(env)
-	if err != nil {
-		panic("error convert " + key)
-	}
-
-	return val
-}
-`
-	Secret = `
-// Secret{{ .Title }} returns the {{ .Field.Type }} environment variable
-// if it is exist and valid or panics otherwise.
-// Also Secret{{ .Title }} immediately deletes it from environment.
-func ({{ .Recv.Name }} *{{ .Recv.Type }})Secret{{ .Title }}(key string) {{ .Field.Type }} {
-	env, ok := os.LookupEnv(key)
-	if !ok {
-		panic("error missing " + key)
-	}
-	_ = os.Unsetenv(key)
-
-	val, err := {{ .Recv.Name }}.{{ .Field.ConvFunc }}(env)
-	if err != nil {
-		panic("error convert " + key)
-	}
-
-	return val
-}
-`
-)
-
+// Recv represents receiver (target struct).
 type Recv struct {
 	Name string
 	Type string
 }
 
+// TmplData contains data for passing inside templates.
 type TmplData struct {
 	Recv  *Recv
 	Title string
@@ -93,11 +32,13 @@ const (
 	construct  = "construct"
 )
 
+// generator uses as inner generator for code generation.
 type generator struct {
 	p          *parser.Parser
 	needImport bool
 }
 
+// CodeGen generates environment helpers by calling inner generator.
 func CodeGen(p *parser.Parser) error {
 	fields := p.ParsedFields()
 	if fields == nil {
@@ -109,6 +50,7 @@ func CodeGen(p *parser.Parser) error {
 	return gen.generateFile()
 }
 
+// generateFile generates environment helpers by result of parsing target environment.
 func (g *generator) generateFile() error {
 	data := g.generateTmplData(g.p.ParsedFields())
 
@@ -154,6 +96,7 @@ func (g *generator) generateFile() error {
 	return nil
 }
 
+// makeRecv returns new Recv from parsing results.
 func (g *generator) makeRecv() *Recv {
 	return &Recv{
 		Type: g.p.Target(),
@@ -161,13 +104,14 @@ func (g *generator) makeRecv() *Recv {
 	}
 }
 
+// generateTmplData converts parsed fields into template data.
 func (g *generator) generateTmplData(fields map[string]*types.Field) map[string]*TmplData {
 	data := make(map[string]*TmplData)
 	recv := g.makeRecv()
 
 	for _, f := range fields {
 		title := strings.Title(strings.ReplaceAll(f.Type, ".", ""))
-		if strings.HasPrefix(f.ConvFunc, "kenv.") {
+		if strings.HasPrefix(f.Func, "kenv.") {
 			g.needImport = true
 			if _, ok := data[f.Type]; ok {
 				continue
@@ -191,10 +135,12 @@ func (g *generator) generateTmplData(fields map[string]*types.Field) map[string]
 	return data
 }
 
+// mustWrite panics on unexpected errors during write operations.
 func mustWrite(_ int, err error) {
 	must(err)
 }
 
+// must panics if err occurred.
 func must(err error) {
 	if err != nil {
 		panic(err)

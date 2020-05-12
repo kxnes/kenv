@@ -19,10 +19,10 @@ type (
 
 	// Field describes the struct field.
 	Field struct {
-		Name     string // Name of field.
-		Type     string // Name of field type.
-		ConvFunc string // Convert function for conversion from `string` to `Type`.
-		EnvVar   string // Name of environment variable.
-		Action   string // Action on environment variable [* ! -].
+		Name   string // Name of field.
+		Type   string // Name of field type.
+		Func   string // Convert function for conversion from `string` to `Type`.
+		EnvVar string // Name of environment variable.
+		Action string // Action on environment variable [* ! -].
 	}
 )
